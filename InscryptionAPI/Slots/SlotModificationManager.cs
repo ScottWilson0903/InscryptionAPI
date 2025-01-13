@@ -566,6 +566,7 @@ public class SlotModificationManager : MonoBehaviour
     }
 
     public const string SLOT_PAGEID = "SlotModification_";
+    private static Vector3 PART_3_SCALE = new(0.7f, 0.7f, 1f);
 
     [HarmonyPrefix, HarmonyPatch(typeof(ItemPage), nameof(ItemPage.FillPage))]
     private static bool OverrideWithSlotInfo(ItemPage __instance, string headerText, params object[] otherArgs)
@@ -574,7 +575,7 @@ public class SlotModificationManager : MonoBehaviour
             return true;
 
         // Slot modification pages use ItemPage format in Act 1
-        __instance.iconRenderer.transform.localScale = Vector3.one;
+        __instance.iconRenderer.transform.localScale = SaveManager.SaveFile.IsPart3 ? PART_3_SCALE : Vector3.one;
         if (otherArgs[0] is string pageId && pageId.StartsWith(SLOT_PAGEID))
         {
             string modString = pageId.Replace(SLOT_PAGEID, "");
@@ -588,20 +589,21 @@ public class SlotModificationManager : MonoBehaviour
                 __instance.nameTextMesh.text = Localization.Translate(info.RulebookName);
                 __instance.descriptionTextMesh.text = Localization.Translate(info.RulebookDescription);
                 __instance.iconRenderer.sprite = info.RulebookSprite;
-                __instance.iconRenderer.transform.localScale = new(0.8f, 0.8f, 0.8f);
+                __instance.iconRenderer.transform.localScale = new(0.8f, 0.8f, 1f);
                 InscryptionAPIPlugin.Logger.LogDebug($"Create rulebook page for slot modification [{info.ModificationType}] ({info.RulebookName}).");
                 return false;
             }
         }
         return true;
     }
+
     [HarmonyPrefix, HarmonyPatch(typeof(AbilityPage), nameof(AbilityPage.FillPage))]
     private static bool OverrideWithSlotInfo(AbilityPage __instance, string headerText, params object[] otherArgs)
     {
         if (SaveManager.SaveFile.IsPart1)
             return true;
 
-        __instance.mainAbilityGroup.iconRenderer.transform.localScale = Vector3.one;
+        __instance.mainAbilityGroup.iconRenderer.transform.localScale = SaveManager.SaveFile.IsPart3 ? PART_3_SCALE : Vector3.one;
         Transform slotRendererObj = __instance.mainAbilityGroup.transform.Find("SlotRenderer");
         slotRendererObj?.gameObject.SetActive(false);
         __instance.mainAbilityGroup.iconRenderer.transform.parent.gameObject.SetActive(true);
@@ -638,7 +640,7 @@ public class SlotModificationManager : MonoBehaviour
                     Debug.Log("Help");
                 }
                 
-                __instance.mainAbilityGroup.iconRenderer.transform.localScale = new(0.8f, 0.8f, 0.8f);
+                __instance.mainAbilityGroup.iconRenderer.transform.localScale = new(0.8f, 0.8f, 1f);
                 //InscryptionAPIPlugin.Logger.LogDebug($"Create rulebook page for slot modification [{info.ModificationType}] ({info.RulebookName}).");
                 return false;
             }
